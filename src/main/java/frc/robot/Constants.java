@@ -19,6 +19,7 @@ public final class Constants {
     public static final int kElevatorMotorCanId = 4;
     public static final int kArmMotorCanId = 3;
     public static final int kIntakeMotorCanId = 2;
+    public static final int kElevatorLimitSwitchChannel = 9; // DIO9 on the RIO
 
     public static final class ElevatorSetpoints {
       public static final int kFeederStation = 0;
@@ -122,6 +123,7 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
     public static final double kDriveDeadband = 0.1;
     public static final double kTriggerButtonThreshold = 0.2;
   }

@@ -60,10 +60,10 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {}
 
-  @Override
+  /*@Override
   public void simulationPeriodic() {
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(
             m_robotContainer.getSimulationTotalCurrentDraw()));
-  }
+  }*/
 }

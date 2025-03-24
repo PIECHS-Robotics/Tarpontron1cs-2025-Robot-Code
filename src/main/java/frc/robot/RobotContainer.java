@@ -11,6 +11,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -19,21 +20,25 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.subsystems.AlgaeSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
-import frc.robot.subsystems.CoralSubsystem.Setpoint;
-//import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.AlgaeSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.commands.*;
 import java.util.List;
+import frc.robot.Constants;
 
 public class RobotContainer {
 
     public static final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+    private final CoralSubsystem m_coralSubsystem = new CoralSubsystem(3, 4, 2, 9);
     private final AlgaeSubsystem m_algaeSubsystem = new AlgaeSubsystem();
+    private final ArmSubsystem armSubsystem = new ArmSubsystem(3);
+    private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(4, 9);
 
     private final PS4Controller m_driverController = new PS4Controller(OIConstants.kDriverControllerPort);
-    private final PS4Controller m_operatorController = new PS4Controller(1); // Assuming Controller 2 is in USB port 1
+    private final PS4Controller m_operatorController = new PS4Controller(OIConstants.kOperatorControllerPort); // Assuming Controller 2 is in USB port 1
 
 
     public RobotContainer() {
@@ -51,14 +56,12 @@ public class RobotContainer {
             )
             
         );
+        
+        //Default command for Elevator subsystem
+        elevatorSubsystem.setDefaultCommand(new ElevatorManualControlCommand(elevatorSubsystem, () -> -m_operatorController.getRawAxis(5)));
 
-        //m_coralSubsystem.setDefaultCommand(
-            //new RunCommand(() -> 
-                //m_coralSubsystem.moveArmManually(m_operatorController.getRawAxis(5)), 
-                //m_coralSubsystem
-            //)
-        //);
-
+        //Default command for Coral Arm subsystem
+        armSubsystem.setDefaultCommand(new ManualCoralArmCommand(armSubsystem, () -> m_operatorController.getRawAxis(1)));
 
         // Default idle behavior for Algae subsystem
         m_algaeSubsystem.setDefaultCommand(m_algaeSubsystem.idleCommand());
@@ -105,7 +108,7 @@ public class RobotContainer {
         //        .alongWith(m_algaeSubsystem.stowCommand()));
 
         new JoystickButton(m_operatorController, 2)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kFeederStation)
+            .onTrue(new MoveToSetpointCommand(armSubsystem, elevatorSubsystem, Setpoints.kFeederStationArm, Setpoints.kFeederStationElevator)
                 .alongWith(m_algaeSubsystem.stowCommand()));            
 
         // Level 2 setpoint (Cross)
@@ -113,21 +116,21 @@ public class RobotContainer {
         //    .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel2));
 
         new JoystickButton(m_operatorController, 1)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel2));    
+            .onTrue(new MoveToSetpointCommand(armSubsystem, elevatorSubsystem, Setpoints.kLevel2Arm, Setpoints.kLevel2Elevator));    
 
         // Level 3 setpoint (Square)
         //new JoystickButton(m_driverController, 3)
             //.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel3));
 
         new JoystickButton(m_operatorController, 3)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel3));    
+            .onTrue(new MoveToSetpointCommand(armSubsystem, elevatorSubsystem, Setpoints.kLevel3Arm, Setpoints.kLevel3Elevator));    
 
         // Level 4 setpoint (Triangle)
         //new JoystickButton(m_driverController, 10)
             //.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel4));
 
         new JoystickButton(m_operatorController, 4)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel4));    
+            .onTrue(new MoveToSetpointCommand(armSubsystem, elevatorSubsystem, Setpoints.kLevel4Arm, Setpoints.kLevel4Elevator));    
 
         // Run Algae intake (R1)
         //new JoystickButton(m_driverController, 6)
@@ -156,9 +159,9 @@ public class RobotContainer {
 
     
 
-    public double getSimulationTotalCurrentDraw() {
-        return m_coralSubsystem.getSimulationCurrentDraw() + m_algaeSubsystem.getSimulationCurrentDraw();
-    }
+    //public double getSimulationTotalCurrentDraw() {
+      //  return m_coralSubsystem.getSimulationCurrentDraw() + m_algaeSubsystem.getSimulationCurrentDraw();
+    //}
 
     public Command getAutonomousCommand() {
         // Create config for trajectory
