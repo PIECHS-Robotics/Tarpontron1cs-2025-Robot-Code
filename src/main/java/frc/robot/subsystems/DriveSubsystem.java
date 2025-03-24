@@ -29,11 +29,12 @@ public class DriveSubsystem extends SubsystemBase {
         Constants.DriveConstants.kRearLeftDrivingCanId,
         Constants.DriveConstants.kRearLeftTurningCanId,
         Constants.DriveConstants.kBackLeftChassisAngularOffset);
-
+    
     private final SwerveModule m_rearRight = new SwerveModule(
         Constants.DriveConstants.kRearRightDrivingCanId,
         Constants.DriveConstants.kRearRightTurningCanId,
-        Constants.DriveConstants.kBackRightChassisAngularOffset);
+        Constants.DriveConstants.kBackRightChassisAngularOffset);    
+    
 
     private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
@@ -45,6 +46,8 @@ public class DriveSubsystem extends SubsystemBase {
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
+            
+            
         });
 
     public DriveSubsystem() {}
@@ -58,12 +61,16 @@ public class DriveSubsystem extends SubsystemBase {
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),
                 m_rearRight.getPosition()
+                
+                
             });
 
         m_frontLeft.periodic();
         m_frontRight.periodic();
         m_rearLeft.periodic();
         m_rearRight.periodic();
+        
+        
     }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -74,6 +81,8 @@ public class DriveSubsystem extends SubsystemBase {
         m_frontRight.setDesiredState(desiredStates[1]);
         m_rearLeft.setDesiredState(desiredStates[2]);
         m_rearRight.setDesiredState(desiredStates[3]);
+        
+        
     }
     
 
@@ -89,6 +98,8 @@ public class DriveSubsystem extends SubsystemBase {
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),
                 m_rearRight.getPosition()
+                
+                
             },
             pose);
     }
@@ -112,6 +123,8 @@ public class DriveSubsystem extends SubsystemBase {
         m_frontRight.setDesiredState(swerveModuleStates[1]);
         m_rearLeft.setDesiredState(swerveModuleStates[2]);
         m_rearRight.setDesiredState(swerveModuleStates[3]);
+        
+        
     }
 
     public void resetEncoders() {
@@ -119,6 +132,20 @@ public class DriveSubsystem extends SubsystemBase {
         m_frontRight.resetEncoders();
         m_rearLeft.resetEncoders();
         m_rearRight.resetEncoders();
+        
+        
+
+        // ✅ Ensure odometry is updated after resetting encoders
+        m_odometry.resetPosition(
+            Rotation2d.fromDegrees(m_gyro.getAngle()),
+            new SwerveModulePosition[]{
+                m_frontLeft.getPosition(),
+                m_frontRight.getPosition(),
+                m_rearLeft.getPosition(),
+                m_rearRight.getPosition()   
+            },
+            new Pose2d(0, 0, Rotation2d.fromDegrees(0)) // ✅ Reset to known starting pose
+        );
     }
 
     public Command setXCommand() {
@@ -127,6 +154,8 @@ public class DriveSubsystem extends SubsystemBase {
             m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
             m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
             m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+            
+            
         });
     }
 

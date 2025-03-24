@@ -5,6 +5,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -24,12 +25,12 @@ public class SwerveModule extends SubsystemBase {
     private final SparkClosedLoopController m_drivingController;
     private final SparkClosedLoopController m_turningController;
 
-    private final double m_chassisAngularOffset;
+    private double m_chassisAngularOffset;
     private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
-    private double normalizeAngle(double rawAngle) {
-        return rawAngle % (2 * Math.PI);
-    }
+    //private double normalizeAngle(double rawAngle) {
+      //  return rawAngle % (2 * Math.PI);
+    //}
 
     public SwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
         m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
@@ -46,11 +47,18 @@ public class SwerveModule extends SubsystemBase {
         // ✅ Get Alternate Encoder (Throughbore Encoder) for turning motor
         m_turningEncoder = m_turningSpark.getAlternateEncoder();
 
+        // ✅ Fix: Apply Alternate Encoder Config with Inversion
+        boolean isInverted = (turningCANId == 5 || turningCANId == 7  || turningCANId == 11 || turningCANId == 9);
+        m_turningSpark.setInverted(isInverted);
+        //m_turningEncoder.setInverted(isInverted);  // ✅ This is the fix!
+        
+        //m_turningSpark.configure(turnEncoderConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);    
+
         // ✅ Get controllers
         m_drivingController = m_drivingSpark.getClosedLoopController();
         m_turningController = m_turningSpark.getClosedLoopController();
 
-        m_chassisAngularOffset = normalizeAngle(m_turningEncoder.getPosition() * 2 * Math.PI);
+        m_chassisAngularOffset = m_turningEncoder.getPosition() * 2 * Math.PI;
         m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
     }
 
@@ -75,10 +83,16 @@ public class SwerveModule extends SubsystemBase {
         SwerveModuleState correctedDesiredState = new SwerveModuleState(
             desiredState.speedMetersPerSecond,
             desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset))
+            
         );
 
         // Optimize the reference state to avoid spinning further than 90 degrees.
         correctedDesiredState = SwerveModuleState.optimize(correctedDesiredState, new Rotation2d(m_turningEncoder.getPosition()));
+
+        //System.out.println("Module " + m_turningSpark.getDeviceId() + 
+          //  " -> Desired Angle: " + desiredState.angle.getDegrees() + 
+            //" | Current Angle: " + m_turningEncoder.getPosition());
+
 
         m_drivingController.setReference(
             correctedDesiredState.speedMetersPerSecond, SparkMax.ControlType.kVelocity
@@ -93,6 +107,7 @@ public class SwerveModule extends SubsystemBase {
     /** Zeroes all the SwerveModule encoders. */
     public void resetEncoders() {
         m_drivingEncoder.setPosition(0);
+        m_chassisAngularOffset = m_turningEncoder.getPosition(); // ✅ Store current turning encoder position as offset
         //m_turningEncoder.setPosition(0);  // Disabled because it's an absolute encoder
     }
 

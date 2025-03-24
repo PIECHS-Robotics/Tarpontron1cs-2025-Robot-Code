@@ -19,7 +19,7 @@ public final class Configs {
             double drivingVelocityFeedForward = 1 / ModuleConstants.kDriveWheelFreeSpeedRps;
 
             drivingConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50);
-            drivingConfig.inverted(true);  // ✅ Flip drive motor direction
+            drivingConfig.inverted(false);  // ✅ Flip drive motor direction
             drivingConfig.encoder
                 .positionConversionFactor(drivingFactor)
                 .velocityConversionFactor(drivingFactor / 60.0);
@@ -29,7 +29,7 @@ public final class Configs {
                 .velocityFF(drivingVelocityFeedForward)
                 .outputRange(-1, 1);
 
-            turningConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
+            turningConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(20);
             turningConfig.alternateEncoder
                 //.inverted(turningCANId == 5 || turningCANId == 7 ? false : true)
                 .countsPerRevolution(8192)
@@ -37,7 +37,7 @@ public final class Configs {
                 .velocityConversionFactor(turningFactor / 60.0);
             turningConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kAlternateOrExternalEncoder)
-                .pid(1, 0, 0)
+                .pid(.1, 0, .0001)
                 .outputRange(-1, 1)
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0, turningFactor);
@@ -51,6 +51,7 @@ public final class Configs {
 
         static {
             armConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+            armConfig.inverted(true);
             armConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(0.1)
@@ -73,7 +74,7 @@ public final class Configs {
                 .maxAcceleration(6000)
                 .allowedClosedLoopError(0.5);
 
-            intakeConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+            intakeConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
         }
     }
 

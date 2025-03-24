@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    RobotContainer.m_robotDrive.drive(0,1,0,true);
+    RobotContainer.m_robotDrive.drive(-1,1,0,true);
   }
 
   @Override

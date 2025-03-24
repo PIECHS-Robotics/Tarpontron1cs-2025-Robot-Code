@@ -23,17 +23,17 @@ public final class Constants {
     public static final class ElevatorSetpoints {
       public static final int kFeederStation = 0;
       public static final int kLevel1 = 0;
-      public static final int kLevel2 = 10;
-      public static final int kLevel3 = 100;
-      public static final int kLevel4 = 165;
+      public static final int kLevel2 = 64;
+      public static final int kLevel3 = 153;
+      public static final int kLevel4 = 184;
     }
 
     public static final class ArmSetpoints {
-      public static final double kFeederStation = 8;
-      public static final double kLevel1 = 26;
-      public static final double kLevel2 = 42;
-      public static final double kLevel3 = 42;
-      public static final double kLevel4 = 42;
+      public static final double kFeederStation = 38.5;
+      public static final double kLevel1 = 6;
+      public static final double kLevel2 = 3;
+      public static final double kLevel3 = 3.8;
+      public static final double kLevel4 = 39.6;
     }
 
     public static final class IntakeSetpoints {
@@ -77,23 +77,28 @@ public final class Constants {
             new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
             new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
-    public static final double kFrontLeftChassisAngularOffset = -Math.toRadians(0.3076172);
-    public static final double kFrontRightChassisAngularOffset = -Math.toRadians(0.175781);
-    public static final double kBackLeftChassisAngularOffset = -Math.toRadians(0.1757812);
-    public static final double kBackRightChassisAngularOffset = Math.toRadians(0.043945);
+    public static final double kFrontLeftChassisAngularOffset = -Math.toRadians(-0.660); // 0.0439
+    public static final double kFrontRightChassisAngularOffset = -Math.toRadians(0.131836); // 0.0439
+    public static final double kBackLeftChassisAngularOffset = -Math.toRadians(-1.49414); // -0.0878
+    public static final double kBackRightChassisAngularOffset = -Math.toRadians(20.083); // 0.0878
+            
+    
+    
             
             
 
     // SPARK MAX CAN IDs
     public static final int kFrontLeftDrivingCanId = 6;
-    public static final int kRearLeftDrivingCanId = 12;
     public static final int kFrontRightDrivingCanId = 8;
+    public static final int kRearLeftDrivingCanId = 12;
     public static final int kRearRightDrivingCanId = 10;
+    
 
     public static final int kFrontLeftTurningCanId = 5;
-    public static final int kRearLeftTurningCanId = 11;
     public static final int kFrontRightTurningCanId = 7;
+    public static final int kRearLeftTurningCanId = 11;
     public static final int kRearRightTurningCanId = 9;
+    
 
     public static final boolean kGyroReversed = false;
   }

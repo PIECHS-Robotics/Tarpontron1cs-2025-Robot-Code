@@ -43,7 +43,7 @@ public class RobotContainer {
         m_robotDrive.setDefaultCommand(
             new RunCommand(
                 () -> m_robotDrive.drive(
-                    -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband),  // Forward/Back
+                    MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband),  // Forward/Back
                     MathUtil.applyDeadband(m_driverController.getRawAxis(0), OIConstants.kDriveDeadband),  // Strafe
                     -MathUtil.applyDeadband(m_driverController.getRawAxis(4), OIConstants.kDriveDeadband), // FIXED: Right Stick X (Rotation)
                     true),
@@ -52,12 +52,12 @@ public class RobotContainer {
             
         );
 
-        m_coralSubsystem.setDefaultCommand(
-            new RunCommand(() -> 
-                m_coralSubsystem.moveArmManually(m_operatorController.getRawAxis(4)), 
-                m_coralSubsystem
-            )
-        );
+        //m_coralSubsystem.setDefaultCommand(
+            //new RunCommand(() -> 
+                //m_coralSubsystem.moveArmManually(m_operatorController.getRawAxis(5)), 
+                //m_coralSubsystem
+            //)
+        //);
 
 
         // Default idle behavior for Algae subsystem
@@ -66,9 +66,15 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
 
+        // Create a combo button trigger for Buttons 1 (Cross) and 2 (Circle)
+        new Trigger(() -> 
+            m_driverController.getRawButton(1) && // Cross button
+            m_driverController.getRawButton(2)    // Circle button
+        ).onTrue(new InstantCommand(() -> m_robotDrive.resetEncoders()));
+
         //m_coralSubsystem.setDefaultCommand(m_coralSubsystem.manualArmControlCommand(() -> m_operatorController.getRawAxis(4)));
         
-        // Set swerve to X (L1)
+        // Set swerve to X (Triangle)
         new JoystickButton(m_driverController, 4)
             .whileTrue(m_robotDrive.setXCommand());
 
@@ -76,10 +82,10 @@ public class RobotContainer {
         //new JoystickButton(m_driverController, 7)
         //     .whileTrue(m_coralSubsystem.runIntakeCommand());
 
-        new Trigger(() -> m_driverController.getRawAxis(2) > 0.2)
-            .whileTrue(m_coralSubsystem.runIntakeCommand());
+        //new Trigger(() -> m_driverController.getRawAxis(2) > 0.2)
+            //.whileTrue(m_coralSubsystem.runIntakeCommand());
 
-        new Trigger(() -> m_operatorController.getRawAxis(2) > 0.2)
+        new Trigger(() -> m_operatorController.getRawAxis(3) > 0.2)
             .whileTrue(m_coralSubsystem.runIntakeCommand());    
 
         // Reverse Coral intake (R2)
@@ -87,59 +93,59 @@ public class RobotContainer {
         //    .whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
         // R2 -> Reverse Coral Intake
-        new Trigger(() -> m_driverController.getRawAxis(3) > 0.2)
-            .whileTrue(m_coralSubsystem.reverseIntakeCommand());
+        //new Trigger(() -> m_driverController.getRawAxis(3) > 0.2)
+            //.whileTrue(m_coralSubsystem.reverseIntakeCommand());
 
-        new Trigger(() -> m_operatorController.getRawAxis(3) > 0.2)
+        new Trigger(() -> m_operatorController.getRawAxis(2) > 0.2)
             .whileTrue(m_coralSubsystem.reverseIntakeCommand());    
 
         // Feeder station setpoint (Circle) & stow algae intake
-        new JoystickButton(m_driverController, 2)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kFeederStation)
-                .alongWith(m_algaeSubsystem.stowCommand()));
+        //new JoystickButton(m_driverController, 2)
+        //    .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kFeederStation)
+        //        .alongWith(m_algaeSubsystem.stowCommand()));
 
         new JoystickButton(m_operatorController, 2)
             .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kFeederStation)
                 .alongWith(m_algaeSubsystem.stowCommand()));            
 
         // Level 2 setpoint (Cross)
-        new JoystickButton(m_driverController, 1)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel2));
+        //new JoystickButton(m_driverController, 1)
+        //    .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel2));
 
         new JoystickButton(m_operatorController, 1)
             .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel2));    
 
         // Level 3 setpoint (Square)
-        new JoystickButton(m_driverController, 3)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel3));
+        //new JoystickButton(m_driverController, 3)
+            //.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel3));
 
         new JoystickButton(m_operatorController, 3)
             .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel3));    
 
         // Level 4 setpoint (Triangle)
-        new JoystickButton(m_driverController, 10)
-            .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel4));
+        //new JoystickButton(m_driverController, 10)
+            //.onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel4));
 
         new JoystickButton(m_operatorController, 4)
             .onTrue(m_coralSubsystem.setSetpointCommand(Setpoint.kLevel4));    
 
         // Run Algae intake (R1)
-        new JoystickButton(m_driverController, 6)
-            .whileTrue(m_algaeSubsystem.runIntakeCommand());
+        //new JoystickButton(m_driverController, 6)
+            //.whileTrue(m_algaeSubsystem.runIntakeCommand());
 
         new JoystickButton(m_operatorController, 6)
             .whileTrue(m_algaeSubsystem.runIntakeCommand());    
 
         // Reverse Algae intake (L1)
-        new JoystickButton(m_driverController, 5)
-            .whileTrue(m_algaeSubsystem.reverseIntakeCommand());
+        //new JoystickButton(m_driverController, 5)
+            //.whileTrue(m_algaeSubsystem.reverseIntakeCommand());
 
         new JoystickButton(m_operatorController, 5)
             .whileTrue(m_algaeSubsystem.reverseIntakeCommand());    
 
         // Zero heading (Options)
-        //new JoystickButton(m_driverController, 4)
-            //.onTrue(m_robotDrive.zeroHeadingCommand());
+        new JoystickButton(m_driverController, 3)
+            .onTrue(m_robotDrive.zeroHeadingCommand());
 
         /*new JoystickButton(m_operatorController, 10)
             .onTrue(new InstantCommand(() -> {
@@ -187,7 +193,7 @@ public class RobotContainer {
         m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
     
         // Return command sequence
-        return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
+        return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, true));
     }
     
 }
