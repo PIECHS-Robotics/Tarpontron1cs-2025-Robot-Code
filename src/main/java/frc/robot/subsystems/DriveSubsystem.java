@@ -38,9 +38,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
+    /** Get gyro angle in radians for internal calculations */
+    private Rotation2d getGyroRotation() {
+        return Rotation2d.fromDegrees(m_gyro.getAngle());
+    }
+
     private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
         DriveConstants.kDriveKinematics,
-        Rotation2d.fromDegrees(m_gyro.getAngle()),
+        getGyroRotation(),
         new SwerveModulePosition[]{
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -55,7 +60,7 @@ public class DriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         m_odometry.update(
-            Rotation2d.fromDegrees(m_gyro.getAngle()),
+            getGyroRotation(),
             new SwerveModulePosition[]{
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
@@ -92,7 +97,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         m_odometry.resetPosition(
-            Rotation2d.fromDegrees(m_gyro.getAngle()),
+            getGyroRotation(),
             new SwerveModulePosition[]{
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
@@ -111,7 +116,7 @@ public class DriveSubsystem extends SubsystemBase {
                     xSpeed * DriveConstants.kMaxSpeedMetersPerSecond,
                     ySpeed * DriveConstants.kMaxSpeedMetersPerSecond,
                     rot * DriveConstants.kMaxAngularSpeed,
-                    Rotation2d.fromDegrees(m_gyro.getAngle()))
+                    getGyroRotation())
                 : new ChassisSpeeds(
                     xSpeed * DriveConstants.kMaxSpeedMetersPerSecond,
                     ySpeed * DriveConstants.kMaxSpeedMetersPerSecond,
@@ -137,23 +142,23 @@ public class DriveSubsystem extends SubsystemBase {
 
         // ✅ Ensure odometry is updated after resetting encoders
         m_odometry.resetPosition(
-            Rotation2d.fromDegrees(m_gyro.getAngle()),
+            getGyroRotation(),
             new SwerveModulePosition[]{
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
                 m_rearLeft.getPosition(),
                 m_rearRight.getPosition()   
             },
-            new Pose2d(0, 0, Rotation2d.fromDegrees(0)) // ✅ Reset to known starting pose
+            new Pose2d(0, 0, Rotation2d.fromRadians(0)) // ✅ Reset to known starting pose
         );
     }
 
     public Command setXCommand() {
         return this.run(() -> {
-            m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-            m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-            m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-            m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+            m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromRadians(Math.PI / 4)));
+            m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromRadians(-Math.PI / 4)));
+            m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromRadians(-Math.PI / 4)));
+            m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromRadians(Math.PI / 4)));
             
             
         });
@@ -164,7 +169,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public double getHeading() {
-        return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
+        return getGyroRotation().getDegrees();
     }
 
     public double getTurnRate() {
